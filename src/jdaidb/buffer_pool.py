@@ -19,30 +19,23 @@ class BufferPool:
         self.current_tick = 0
         self.page_ticks = [self.current_tick] * self.max_pages
     
-    # TODO(A1): create a new page for the database
-    #           return both the page and the id of the page
     def new_page(self) -> int:
-        page_id = self.storage_manager.catalog.new_page_directory_entry()
+        page_id = self.storage_manager.catalog.new_page()
         self.storage_manager.flush_page(page_id, Page(self.storage_manager.page_size))
         return page_id
 
     # TODO(A1): write the page in the database 
-    def write_page(self, id: int, updated_page: Page) -> Page:
+    def write_page(self, id: int, updated_page: Page):
         pass
 
-    # TODO(A1): delete the page in the database
-    def delete_page(self, id: int) -> Page:
-        pass
-
-    # TODO(A1): read the page in the database
-    def read_page(self, id: int) -> Page:
-        pass
+    def delete_page(self, id: int):
+        self.storage_manager.catalog.delete_page(id)
 
     # TODO(A1): flush the page in the buffer pool into the disk
     def flush_page(self, id: int) -> Page:
         pass
 
-    def get_page(self, id: int) -> Page:
+    def read_page(self, id: int) -> Page:
         if not self.storage_manager.catalog.page_exist(id):
             return None
 
