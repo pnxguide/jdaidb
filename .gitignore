@@ -13,6 +13,8 @@ src/*
 
 !src/sunbears/
 src/sunbears/__pycache__/
+src/sunbears/.*/
 
 !src/jdaidb/
 src/jdaidb/__pycache__/
+src/jdaidb/.*/
