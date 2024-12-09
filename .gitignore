@@ -9,7 +9,6 @@
 
 !src/
 src/*
-!src/test.py
 
 !src/sunbears/
 src/sunbears/__pycache__/
@@ -18,3 +17,7 @@ src/sunbears/.*/
 !src/jdaidb/
 src/jdaidb/__pycache__/
 src/jdaidb/.*/
+
+!src/tests/
+src/tests/__pycache__/
+src/tests/.*/
