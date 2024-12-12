@@ -1,52 +1,75 @@
 from sunbears.dataframe import DataFrame
 
 class Page:
-    def __init__(self, types: list[type], tuples: list[tuple[...]], page_size: int):
-        self.types = types
-        self.tuples = tuples
-        self.page_size = page_size
+    def __init__(self, page_size=512, types=[], tuples=[], page_str=None):
+        if not page_str is None:
+            lines = page_str.strip().splitlines()
+            self.page_size = int(lines[0])
+            self.types = lines[1].strip().split(",")
+            self.tuples = []
+
+            # tuples
+            for line in lines[2:]:
+                tokens = line.split(",")
+                row = []
+                for i in range(len(tokens)):
+                    if self.types[i] == "INTEGER":
+                        row.append(int(tokens[i]))
+                    elif self.types[i] == "FLOAT":
+                        row.append(float(tokens[i]))
+                    elif self.types[i] == "VARCHAR_64":
+                        row.append(str(tokens[i]))
+                    else:
+                        raise ValueError(f"type {self.types[i]} mismatched")
+                self.tuples.append(tuple(row))
+        else:
+            self.types = types
+            self.tuples = tuples
+            self.page_size = page_size
+
         # let's make an assumption that all the types use 32 bytes
-        self.tuple_size = 32 * len(types)
+        self.tuple_size = 32 * len(self.types)
         # compute the max number of tuples
         self.max_tuples = self.page_size // self.tuple_size
-    
-    # TODO(A1): deserialize the string into an object
-    #           HINT: CSV -> DataFrame
-    def __init__(self, page_str: str):
-        pass
 
-    def __init__(self, page_size: int):
-        self.types = []
-        self.tuples = []
-        self.page_size = page_size
+    def __str__(self) -> str:
+        text = f"{self.page_size}\n"
 
-    # TODO(A1): serialize the object into a string
-    #           the string should be CSV-like
-    #           1st row: column names, 2nd row: column types, 3rd onwards: data
-    #           Differ from DataFrame (i.e., 2nd row contains column types)
-    def __str__(self):
-        return ""
+        # add types
+        for i in range(len(self.types)):
+            text += f"{self.types[i]}"
+            if i < len(self.types) - 1:
+                text += ","
+        text += "\n"
+
+        # add tuples
+        for row in self.tuples:
+            row_text = ""
+            for i in range(len(row)):
+                row_text += f"{row[i]}"
+                if i < len(row) - 1:
+                    row_text += ","
+            text += row_text + "\n"
+        return text
 
     """
     Public Functions
     """
 
-    # TODO(A1): add a tuple at the back of the tuple list
-    #           HINT: .append(tuple)
+    # C
     def add_tuple(self, new_tuple: tuple[...]):
         self.tuples.append(new_tuple)
 
-    # TODO(A1): remove a tuple at the certain slot
-    #           other tuples must be shifted
-    #           HINT: .pop(index)
+    # R
+    def get_all_tuples(self):
+        return self.tuples
+
+    # D
     def remove_tuple(self, index: int):
         self.tuples.pop(index)
 
-    # TODO(A1): convert from Page to DataFrame object
-    #           HINT: Page -> CSV -> DataFrame
-    #                 OR str(self) -> DataFrame
-    def to_dataframe(self) -> DataFrame:
-        return DataFrame([], [], [])
-
     def length(self) -> int:
         return len(self.tuples)
+
+    def is_full(self) -> bool:
+        return len(self.tuples) >= self.max_tuples

@@ -1,4 +1,5 @@
 from jdaidb.storage_manager.page import Page
+from jdaidb.storage_manager.buffer_pool import BufferPool
 from jdaidb.catalog.core import Catalog
 from jdaidb.common.file import write_file, read_file, create_file
 import os
@@ -14,14 +15,18 @@ class StorageManager:
 
         self.__restore()
 
+        # TODO(A1): Buffer pool initialization
+        self.buffer_pool = BufferPool(16)
+
     """
     Public Functions
     """
 
     # C
-    def create_page(self) -> int:
+    def create_page(self, types) -> int:
         self.current_page_id += 1
-        create_file(f"{self.disk_path}/{self.current_page_id}.page")
+        new_page = Page(page_size=self.page_size, types=types)
+        write_file(f"{self.disk_path}/{self.current_page_id}.page", str(new_page))
         self.page_directory[self.current_page_id] = f"{self.disk_path}/{self.current_page_id}.page"
         self.__flush()
         return self.current_page_id
@@ -31,8 +36,16 @@ class StorageManager:
         path = self.__find_page(id)
         if path == None:
             raise ValueError(f"Page {id} does not exist")
+
+        # TODO(A1): Check whether the page is in buffer pool or not
+
+        
         page_content = read_file(path)
-        return Page(page_content)
+        page = Page(page_str=page_content)
+        return page
+    
+    def is_page_full(self, id: int) -> bool:
+        return self.read_page(id).is_full()
     
     # U
     def update_page(self, id: int, updated_page: Page):
@@ -41,6 +54,11 @@ class StorageManager:
             raise ValueError(f"Page {id} does not exist")
         write_file(path, str(updated_page))
         self.__flush()
+
+    def add_tuple_to_page(self, id: int, row: tuple) -> bool:
+        page = self.read_page(id)
+        page.add_tuple(row)
+        self.update_page(id, page)
 
     # D
     def delete_page(self, id: int):

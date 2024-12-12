@@ -39,7 +39,7 @@ class Parser:
             self.engine.drop_table(table_name)
             print(f"table {table_name} has been dropped")
 
-        # INSERT [table_name] VALUES ()
+        # INSERT INTO [table_name] VALUES [val1] [val2] ...
         elif upper_tokens[0:2] == ["INSERT", "INTO"] and upper_tokens[3] == "VALUES":
             table_name = tokens[2]
             values = tokens[4:]

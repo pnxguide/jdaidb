@@ -20,7 +20,10 @@ class CLI:
             try:
                 if user_input.upper() == "EXIT":
                     break
-                self.parser.process(user_input)
+                elif user_input == "":
+                    continue
+                else:
+                    self.parser.process(user_input)
             except Exception as e:
                 print(f"an error has occurred. ({str(e)})")
         

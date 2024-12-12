@@ -35,6 +35,9 @@ class Catalog:
     def get_pages_from_table(self, table_name: str) -> list[int]:
         return self.__table_directory[table_name].page_ids
 
+    def get_types_from_table(self, table_name: str) -> list[str]:
+        return self.__table_directory[table_name].column_types
+
     # U
     def add_page_to_table(self, table_name: str, page_id: int):
         self.__table_directory[table_name].add_page(page_id)

@@ -31,21 +31,27 @@ class TableEntry:
         self.page_ids.remove(page_id)
 
     def fancy_str(self):
-        text = ""
+        column_names = "│"
         for i in range(len(self.column_names)):
-            text += f"{self.column_names[i]}-{self.column_types[i]}"
+            column_names += f"{self.column_names[i].center(12, " ")}"
             if i < (len(self.column_names) - 1):
-                text += "|"
+                column_names += "│"
+        column_names += "│"
 
-        straight_line = "-" * (len(text) + 2) + "\n"
+        column_types = "│"
+        for i in range(len(self.column_names)):
+            column_types += f"{self.column_types[i].center(12, " ")}"
+            if i < (len(self.column_names) - 1):
+                column_types += "│"
+        column_types += "│"
 
-        table_name = ""
-        table_name += straight_line
-        table_name += ("|" + self.table_name.center(len(text), " ") + "|") + "\n"
-        table_name += straight_line
+        fancy_table_name = f"Table {self.table_name}"
+        table_name = ("│" + fancy_table_name.center(25, " ") + "│") + "\n"
 
-        text = "|" + text + "|" + "\n"
-        text = table_name + text
-        text += straight_line
+        text = "┌" + ("─" * 25) + "┐" + "\n"
+        text += table_name
+        text += "├" + ("─" * 12) + "┬" + ("─" * 12) + "┤" + "\n"
+        text += column_names + "\n"
+        text += column_types + "\n"
         
         return text

@@ -1,28 +1,19 @@
-from jdaidb.storage_manager.core import StorageManager
-from jdaidb.storage_manager.page import Page
-
 class BufferPool:
-    def __init__(self, storage_manager: StorageManager):
-        self.storage_manager = storage_manager
-        # maximum size of the pool (does not need to use all of them)
-        self.max_size = storage_manager.catalog.buffer_size
-        # maximum number of pages
-        self.max_pages = self.max_size // self.storage_manager.page_size
-        # current number of pages
+    def __init__(self, num_slots: int):
+        self.num_slots = num_slots
         self.num_pages = 0
+
         # list of pages (i.e., page IDs)
-        self.page_ids = [-1] * self.max_pages
-        self.pages = [None] * self.max_pages
+        self.page_ids = [-1] * self.num_slot
+        self.pages = [None] * self.num_slot
 
         # TODO(A1): add more local variables (if needed)
         # page timestamps (for eviction)
         self.current_tick = 0
-        self.page_ticks = [self.current_tick] * self.max_pages
+        self.page_ticks = [self.current_tick] * self.num_slot
     
-    def new_page(self) -> int:
-        page_id = self.storage_manager.catalog.new_page()
-        self.storage_manager.flush_page(page_id, Page(self.storage_manager.page_size))
-        return page_id
+    def pin_page(self, id: int):
+        pass
 
     # TODO(A1): write the page in the database 
     def write_page(self, id: int, updated_page: Page):
