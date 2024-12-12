@@ -29,7 +29,7 @@ class StorageManager:
     # R
     def read_page(self, id: int) -> Page:
         path = self.__find_page(id)
-        if path == -1:
+        if path == None:
             raise ValueError(f"Page {id} does not exist")
         page_content = read_file(path)
         return Page(page_content)
@@ -37,7 +37,7 @@ class StorageManager:
     # U
     def update_page(self, id: int, updated_page: Page):
         path = self.__find_page(id)
-        if path == -1:
+        if path == None:
             raise ValueError(f"Page {id} does not exist")
         write_file(path, str(updated_page))
         self.__flush()
@@ -46,7 +46,7 @@ class StorageManager:
     def delete_page(self, id: int):
         if self.__page_exist(id):
             os.remove(self.page_directory[id])
-            self.page_directory[id] = f""
+            self.page_directory.pop(id)
         else:
             raise ValueError(f"Page {id} does not exist")
         self.__flush()
@@ -59,10 +59,7 @@ class StorageManager:
         return id in self.page_directory
 
     def __find_page(self, id: int) -> str:
-        if self.__page_exist(id):
-            return self.page_directory[id]
-        else:
-            return None
+        return self.page_directory[id]
 
     def __flush(self):
         page_directory_str = f"{self.current_page_id}|{len(self.page_directory.keys())}"

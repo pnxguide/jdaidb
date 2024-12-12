@@ -45,8 +45,8 @@ class Catalog:
         self.__flush()
 
     # D
-    def remove_table_entry(self, table_name: str, column_names: list[str], column_types: list[type]):
-        if not table_name in self.catalog.__table_directory:
+    def remove_table_entry(self, table_name: str):
+        if not table_name in self.__table_directory:
             raise ValueError(f"{table_name} does not exist.")
         self.__table_directory.pop(table_name)
         self.__flush()
@@ -77,7 +77,7 @@ class Catalog:
                 column_types.append(tokens[i+1])
             num_pages = int(tokens[2+(num_columns * 2)])
             page_ids = []
-            for i in range(2+(num_columns * 2), 2+(num_columns * 2)+num_pages, 1):
+            for i in range(3+(num_columns * 2), 3+(num_columns * 2)+num_pages, 1):
                 page_ids.append(int(tokens[i]))
 
             self.__table_directory[table_name] = TableEntry(table_name, column_names, column_types, page_ids)

@@ -28,19 +28,19 @@ class QueryEngine():
     def insert_tuple_into_table(self, table_name: str, tuple: tuple[...]):
         if not table_name in self.catalog.table_directory:
             raise ValueError(f"{table_name} does not exist.")
-
+        
     # SELECT *
     def read_table(self, table_name: str) -> str:
         text = ""
         text += self.catalog.get_table_header(table_name)
-        
+
         row_count = 0
         page_ids = self.catalog.get_pages_from_table(table_name)
         for page_id in page_ids:
             page = self.storage_manager.read_page(page_id)
             text += str(page)
             row_count += page.length()
-
+        
         text += f"(Result: {row_count} row(s))"
 
         return text

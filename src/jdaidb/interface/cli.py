@@ -15,9 +15,8 @@ class CLI:
         print("to exit, please type EXIT")
 
         while True:
-            print("🐱 > ", end="")
+            print("🐱 ", end="")
             user_input = str(input())
-
             try:
                 if user_input.upper() == "EXIT":
                     break
@@ -26,4 +25,3 @@ class CLI:
                 print(f"an error has occurred. ({str(e)})")
         
         print("jdaidb is successfully exited")
-    
