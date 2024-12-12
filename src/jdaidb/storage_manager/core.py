@@ -1,6 +1,7 @@
 from jdaidb.storage_manager.page import Page
 from jdaidb.catalog.core import Catalog
 from jdaidb.common.file import write_file, read_file, create_file
+import os
 
 class StorageManager:
     def __init__(self, catalog: Catalog):
@@ -11,6 +12,8 @@ class StorageManager:
         self.current_page_id = 0
         self.page_directory = {}
 
+        self.__restore()
+
     """
     Public Functions
     """
@@ -20,13 +23,14 @@ class StorageManager:
         self.current_page_id += 1
         create_file(f"{self.disk_path}/{self.current_page_id}.page")
         self.page_directory[self.current_page_id] = f"{self.disk_path}/{self.current_page_id}.page"
+        self.__flush()
         return self.current_page_id
     
     # R
     def read_page(self, id: int) -> Page:
         path = self.__find_page(id)
         if path == -1:
-            return None
+            raise ValueError(f"Page {id} does not exist")
         page_content = read_file(path)
         return Page(page_content)
     
@@ -34,15 +38,18 @@ class StorageManager:
     def update_page(self, id: int, updated_page: Page):
         path = self.__find_page(id)
         if path == -1:
-            # TODO(A1): create new file for the page
-            pass
+            raise ValueError(f"Page {id} does not exist")
         write_file(path, str(updated_page))
+        self.__flush()
 
     # D
     def delete_page(self, id: int):
         if self.__page_exist(id):
             os.remove(self.page_directory[id])
             self.page_directory[id] = f""
+        else:
+            raise ValueError(f"Page {id} does not exist")
+        self.__flush()
 
     """
     Private Functions
@@ -57,10 +64,22 @@ class StorageManager:
         else:
             return None
 
-    # TODO(A1): serialize self.page_directory into str
-    def __serialize_page_directory(self) -> str:
-        return ""
+    def __flush(self):
+        page_directory_str = f"{self.current_page_id}|{len(self.page_directory.keys())}"
+        for page_id in self.page_directory.keys():
+            page_directory_str += f"|{page_id}|{self.page_directory[page_id]}"
+        page_directory_str += "\n"
+        write_file(f"{self.disk_path}/.pagedir", page_directory_str)
 
-    # TODO(A1): cast 'data' into self.page_directory
-    def __deserialize_page_directory(self, data: str):
-        pass
+    def __restore(self):
+        if not os.path.exists(f"{self.disk_path}/.pagedir"):
+            return
+        
+        content = read_file(f"{self.disk_path}/.pagedir").strip()
+        tokens = content.split("|")
+        self.current_page_id = int(tokens[0])
+        num_page_directory_entry = int(tokens[1])
+        for i in range(2, 2+num_page_directory_entry, 2):
+            key = int(tokens[i])
+            value = str(tokens[i+1])
+            self.page_directory[key] = value

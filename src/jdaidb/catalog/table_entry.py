@@ -37,9 +37,15 @@ class TableEntry:
             if i < (len(self.column_names) - 1):
                 text += "|"
 
-        table_name = self.table_name.center(len(text), " ")
-        
-        text += "\n"
-        text = table_name + "\n" + text
+        straight_line = "-" * (len(text) + 2) + "\n"
+
+        table_name = ""
+        table_name += straight_line
+        table_name += ("|" + self.table_name.center(len(text), " ") + "|") + "\n"
+        table_name += straight_line
+
+        text = "|" + text + "|" + "\n"
+        text = table_name + text
+        text += straight_line
         
         return text

@@ -72,12 +72,12 @@ class Catalog:
             num_columns = int(tokens[1])
             column_names = []
             column_types = []
-            for i in range(1, 1+(num_columns * 2), 2):
+            for i in range(2, 2+(num_columns * 2), 2):
                 column_names.append(tokens[i])
-                column_types.append(type(tokens[i+1]))
-            num_pages = int(tokens[(num_columns * 2)+1])
+                column_types.append(tokens[i+1])
+            num_pages = int(tokens[2+(num_columns * 2)])
             page_ids = []
-            for i in range(1+(num_columns * 2), 1+(num_columns * 2)+num_pages, 1):
+            for i in range(2+(num_columns * 2), 2+(num_columns * 2)+num_pages, 1):
                 page_ids.append(int(tokens[i]))
 
             self.__table_directory[table_name] = TableEntry(table_name, column_names, column_types, page_ids)
