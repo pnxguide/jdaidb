@@ -4,7 +4,7 @@
 
 `jdaidb` is an educational database management system written in Python. This system is not ready for production. Please use it at your risk.
 
-This system is based on the great Codd's Relational data model. It is enhanced with the LRU-based buffer pool and slotted pages for OLTP-based workloads. This system also supports a subset of SQL-92 with decent implementations of relational operators. This system does not support multiple users at the same time (i.e., concurrent access).
+This system is based on the great Codd's Relational data model. It is enhanced with the fake LRU-based buffer pool for OLTP-based workloads. This system also supports a subset of SQL-92 with decent implementations of relational operators. This system does not support multiple users at the same time (i.e., concurrent access).
 
 ## Integration Dependency
 This system must be used with `sunbears`'s DataFrame.
