@@ -6,13 +6,11 @@ class Catalog:
     def __init__(self, disk_path: str, page_size: int, buffer_size: int):
         self.disk_path = disk_path
         self.catalog_path = f"{disk_path}/.catalog"
-        self.__restore()
-
         self.page_size = page_size
         self.buffer_size = buffer_size
 
-        # catalog state
         self.__table_directory = {}
+        self.__restore()
     
     def __del__(self):
         self.__flush()
@@ -26,12 +24,13 @@ class Catalog:
         if table_name in self.__table_directory:
             raise ValueError(f"{table_name} has already existed.")
         self.__table_directory[table_name] = TableEntry(table_name, column_names, column_types)
+        self.__flush()
 
     # R
     def get_table_header(self, table_name: str):
         if not table_name in self.__table_directory:
             raise ValueError(f"{table_name} does not exist.")
-        return str(self.__table_directory[table_name])
+        return self.__table_directory[table_name].fancy_str()
 
     def get_pages_from_table(self, table_name: str) -> list[int]:
         return self.__table_directory[table_name].page_ids
@@ -39,15 +38,18 @@ class Catalog:
     # U
     def add_page_to_table(self, table_name: str, page_id: int):
         self.__table_directory[table_name].add_page(page_id)
+        self.__flush()
     
     def remove_page_from_table(self, table_name: str, page_id: int):
         self.__table_directory[table_name].remove_page(page_id)
+        self.__flush()
 
     # D
     def remove_table_entry(self, table_name: str, column_names: list[str], column_types: list[type]):
         if not table_name in self.catalog.__table_directory:
             raise ValueError(f"{table_name} does not exist.")
         self.__table_directory.pop(table_name)
+        self.__flush()
 
     """
     Private Functions
@@ -61,17 +63,33 @@ class Catalog:
 
         # open and read the catalog
         f = open(self.catalog_path, "r")
-        catalog_content = f.read()
-        f.close()
 
-        # TODO(A1): recover table_directory
-        self.__table_directory = {}
+        for line in f:
+            line = line.strip()
+            tokens = line.split("|")
+            
+            table_name = tokens[0]
+            num_columns = int(tokens[1])
+            column_names = []
+            column_types = []
+            for i in range(1, 1+(num_columns * 2), 2):
+                column_names.append(tokens[i])
+                column_types.append(type(tokens[i+1]))
+            num_pages = int(tokens[(num_columns * 2)+1])
+            page_ids = []
+            for i in range(1+(num_columns * 2), 1+(num_columns * 2)+num_pages, 1):
+                page_ids.append(int(tokens[i]))
+
+            self.__table_directory[table_name] = TableEntry(table_name, column_names, column_types, page_ids)
+
+        f.close()
 
     def __flush(self):
         f = open(self.catalog_path, "w")
 
-        # TODO(A1): serialize table_directory
         table_directory_str = ""
+        for table_name in self.__table_directory.keys():
+            table_directory_str += str(self.__table_directory[table_name])
 
         f.write(table_directory_str)
         f.close()

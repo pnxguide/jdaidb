@@ -12,9 +12,12 @@ Create the 'disks' path
 import shutil
 import os
 
-if os.path.exists(DISK_PATH) and os.path.isdir(DISK_PATH):
-    shutil.rmtree(DISK_PATH)
-os.makedirs(DISK_PATH)
+# if os.path.exists(DISK_PATH) and os.path.isdir(DISK_PATH):
+#     shutil.rmtree(DISK_PATH)
+# os.makedirs(DISK_PATH)
+
+if not os.path.exists(DISK_PATH):
+    os.makedirs(DISK_PATH)
 
 """
 Begin testing
