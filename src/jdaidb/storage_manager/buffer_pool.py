@@ -1,11 +1,11 @@
-from jdaidb.storage_manager import StorageManager
-from jdaidb.page import Page
+from jdaidb.storage_manager.core import StorageManager
+from jdaidb.storage_manager.page import Page
 
 class BufferPool:
-    def __init__(self, storage_manager: StorageManager, max_size: int):
+    def __init__(self, storage_manager: StorageManager):
         self.storage_manager = storage_manager
         # maximum size of the pool (does not need to use all of them)
-        self.max_size = max_size
+        self.max_size = storage_manager.catalog.buffer_size
         # maximum number of pages
         self.max_pages = self.max_size // self.storage_manager.page_size
         # current number of pages
