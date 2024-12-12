@@ -10,13 +10,6 @@ class Page:
         # compute the max number of tuples
         self.max_tuples = self.page_size // self.tuple_size
     
-    # TODO(A1): serialize the object into a string
-    #           the string should be CSV-like
-    #           1st row: column names, 2nd row: column types, 3rd onwards: data
-    #           Differ from DataFrame (i.e., 2nd row contains column types)
-    def __str__(self):
-        return ""
-
     # TODO(A1): deserialize the string into an object
     #           HINT: CSV -> DataFrame
     def __init__(self, page_str: str):
@@ -26,6 +19,17 @@ class Page:
         self.types = []
         self.tuples = []
         self.page_size = page_size
+
+    # TODO(A1): serialize the object into a string
+    #           the string should be CSV-like
+    #           1st row: column names, 2nd row: column types, 3rd onwards: data
+    #           Differ from DataFrame (i.e., 2nd row contains column types)
+    def __str__(self):
+        return ""
+
+    """
+    Public Functions
+    """
 
     # TODO(A1): add a tuple at the back of the tuple list
     #           HINT: .append(tuple)
@@ -43,3 +47,6 @@ class Page:
     #                 OR str(self) -> DataFrame
     def to_dataframe(self) -> DataFrame:
         return DataFrame([], [], [])
+
+    def length(self) -> int:
+        return len(self.tuples)
