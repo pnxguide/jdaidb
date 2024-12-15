@@ -51,7 +51,7 @@ class StorageManager:
             page_content = read_file(path)
             page = Page(page_str=page_content)
             self.buffer_pool.put(id, page)
-        
+
         return page
     
     def is_page_full(self, id: int) -> bool:
@@ -119,7 +119,7 @@ class StorageManager:
         tokens = content.split("|")
         self.current_page_id = int(tokens[0])
         num_page_directory_entry = int(tokens[1])
-        for i in range(2, 2+num_page_directory_entry, 2):
+        for i in range(2, 2+(num_page_directory_entry*2), 2):
             key = int(tokens[i])
             value = str(tokens[i+1])
             self.page_directory[key] = value

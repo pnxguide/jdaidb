@@ -28,13 +28,5 @@ qe = QueryEngine(catalog=catalog, storage_manager=sm)
 
 parser = Parser(qe)
 
-# parser.process("CREATE TABLE abc id INTEGER name VARCHAR_64 salary FLOAT")
-# parser.process("SELECT * FROM abc")
-# parser.process("INSERT INTO abc VALUES 1 Alice 50.5")
-# parser.process("INSERT INTO abc VALUES 2 21.4 Bob")
-# parser.process("INSERT INTO abc VALUES 2 Bob 21.4")
-# parser.process("INSERT INTO abc VALUES 3 Charles 10.3")
-# parser.process("SELECT * FROM abc")
-
 instance = CLI(parser)
 instance.run()
