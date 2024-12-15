@@ -16,9 +16,6 @@ if os.path.exists(DISK_PATH) and os.path.isdir(DISK_PATH):
     shutil.rmtree(DISK_PATH)
 os.makedirs(DISK_PATH)
 
-# if not os.path.exists(DISK_PATH):
-#     os.makedirs(DISK_PATH)
-
 """
 Begin testing
 """
@@ -37,11 +34,3 @@ parser.process(f"INSERT INTO buffer VALUES {999}")
 parser.process("SELECT * FROM buffer")
 
 parser.teardown()
-
-# parser.process("CREATE TABLE abc id INTEGER name VARCHAR_64 salary FLOAT")
-# parser.process("SELECT * FROM abc")
-# parser.process("INSERT INTO abc VALUES 1 Alice 50.5")
-# parser.process("INSERT INTO abc VALUES 2 21.4 Bob")
-# parser.process("INSERT INTO abc VALUES 2 Bob 21.4")
-# parser.process("INSERT INTO abc VALUES 3 Charles 10.3")
-# parser.process("SELECT * FROM abc")

@@ -39,7 +39,7 @@ class BufferPool:
                 return
         
         # if not found
-        self.__pin_page(id, updated_page)
+        self.pin_page(id, updated_page)
         return
 
     def flush_all(self):
@@ -47,12 +47,8 @@ class BufferPool:
             if self.page_ids[i] != -1:
                 self.storage_manager.flush_page(self.page_ids[i], self.pages[i])
 
-    """
-    Private Functions
-    """
-
     # TODO:
-    def __pin_page(self, id: int, new_page: Page) -> int:
+    def pin_page(self, id: int, new_page: Page) -> int:
         # if buffer is available
         if self.num_pages < self.num_slots:
             # find the index
@@ -62,7 +58,7 @@ class BufferPool:
                     break
         # if not, eviction is needed
         else:
-            index = self.__evict()
+            index = self.evict(id=None)
         
         # update tick
         self.current_tick += 1
@@ -80,17 +76,27 @@ class BufferPool:
         # return the page
         return index
 
-    def __evict(self) -> int:
-        if self.num_pages < self.num_slots:
-            raise Exception("eviction should not happen")
+    def evict(self, id=None) -> int:
+        evicted_index = -1
+
+        if id == None:
+            if self.num_pages < self.num_slots:
+                raise Exception("eviction should not happen")
         
-        # TODO(A1): replace with the LRU algorithm
-        evicted_index = 0
-        min_tick = self.page_ticks[0]
-        for i in range(self.num_slots):
-            if self.page_ticks[i] < min_tick:
-                min_tick = self.page_ticks[i]
-                evicted_index = i
+            # TODO(A1): use LRU
+            min_tick = self.page_ticks[0]
+            for i in range(self.num_slots):
+                if self.page_ticks[i] < min_tick:
+                    min_tick = self.page_ticks[i]
+                    evicted_index = i
+        else:
+            for i in range(self.num_slots):
+                if self.page_ids[i] == id:
+                    evicted_index = i
+                    break
+
+            if evicted_index == -1:
+                raise Exception("buffer pool cannot evict")
 
         # TODO(A1): flush page to disk
         self.storage_manager.flush_page(self.page_ids[evicted_index], self.pages[evicted_index])
@@ -99,6 +105,6 @@ class BufferPool:
         self.page_ids[evicted_index] = -1
         self.page_ticks[evicted_index] = self.current_tick
 
-        print(f"evict {evicted_index}")
-        
+        self.num_pages -= 1
+
         return evicted_index
