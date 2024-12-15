@@ -27,4 +27,7 @@ class CLI:
             except Exception as e:
                 print(f"an error has occurred. ({str(e)})")
         
+        # delete parser and dependencies
+        del self.parser
+        
         print("jdaidb is successfully exited")

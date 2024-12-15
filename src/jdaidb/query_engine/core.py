@@ -6,6 +6,10 @@ class QueryEngine():
         self.catalog = catalog
         self.storage_manager = storage_manager
 
+    def teardown(self):
+        self.catalog.teardown()
+        self.storage_manager.teardown()
+
     """
     Public Functions
     """
@@ -26,6 +30,18 @@ class QueryEngine():
 
     # INSERT
     def insert_tuple_into_table(self, table_name: str, row: tuple[...]):
+        # check type
+        types = self.catalog.get_types_from_table(table_name)
+        for i in range(len(types)):
+            if types[i] == "INTEGER":
+                int(row[i])
+            elif types[i] == "FLOAT":
+                float(row[i])
+            elif types[i] == "VARCHAR_64":
+                str(row[i])
+            else:
+                raise ValueError(f"type {types[i]} does not exist")
+
         page_ids = self.catalog.get_pages_from_table(table_name)
 
         is_inserted = False
@@ -44,22 +60,36 @@ class QueryEngine():
         
     # SELECT *
     def read_table(self, table_name: str) -> str:
+        COLUMN_SIZE = 13
+
         text = ""
-        text += self.catalog.get_table_header(table_name)
+        header, num_col = self.catalog.get_table_header(table_name)
+        text += header
         row_count = 0
         page_ids = self.catalog.get_pages_from_table(table_name)
         for page_id in page_ids:
             page = self.storage_manager.read_page(page_id)
             for row in page.get_all_tuples():
                 if row_count == 0:
-                    text += "├" + ("─" * 12) + "┼" + ("─" * 12) + "┤" + "\n"
-                text += "│"
-                for value in row:
-                    text += str(value).center(12, " ")
+                    text += "├" + ((("─" * COLUMN_SIZE) + "┼") * (num_col - 1)) + ("─" * COLUMN_SIZE) + "┤" + "\n"
+
+                if row_count < 10:
                     text += "│"
-                text += "\n"
+                    for value in row:
+                        text += str(value).center(COLUMN_SIZE, " ")
+                        text += "│"
+                    text += "\n"
+
                 row_count += 1
-        text += "└" + ("─" * 12) + "┴" + ("─" * 12) + "┘" + "\n"
+
+        if row_count > 10:
+            text += "│"
+            for value in ["..."] * num_col:
+                text += str(value).center(COLUMN_SIZE, " ")
+                text += "│"
+            text += "\n"
+
+        text += "└" + ((("─" * COLUMN_SIZE) + "┴") * (num_col - 1)) + ("─" * COLUMN_SIZE) + "┘" + "\n"
         
         text += f"(Result: {row_count} row(s))"
 

@@ -30,28 +30,39 @@ class TableEntry:
             raise ValueError(f"page {page_id} has not already been added.")
         self.page_ids.remove(page_id)
 
-    def fancy_str(self):
-        column_names = "│"
-        for i in range(len(self.column_names)):
-            column_names += f"{self.column_names[i].center(12, " ")}"
-            if i < (len(self.column_names) - 1):
-                column_names += "│"
-        column_names += "│"
+    def fancy_str(self) -> (str, int):
+        if len(self.column_names) > 0:
+            COLUMN_SIZE = 13
+            TABLE_SIZE = ((COLUMN_SIZE + 1) * len(self.column_names)) - 1
 
-        column_types = "│"
-        for i in range(len(self.column_names)):
-            column_types += f"{self.column_types[i].center(12, " ")}"
-            if i < (len(self.column_names) - 1):
-                column_types += "│"
-        column_types += "│"
+            column_names = "│"
+            for i in range(len(self.column_names)):
+                column_names += f"{self.column_names[i].center(COLUMN_SIZE, ' ')}"
+                if i < (len(self.column_names) - 1):
+                    column_names += "│"
+            column_names += "│"
 
-        fancy_table_name = f"Table {self.table_name}"
-        table_name = ("│" + fancy_table_name.center(25, " ") + "│") + "\n"
-
-        text = "┌" + ("─" * 25) + "┐" + "\n"
-        text += table_name
-        text += "├" + ("─" * 12) + "┬" + ("─" * 12) + "┤" + "\n"
-        text += column_names + "\n"
-        text += column_types + "\n"
+            column_types = "│"
+            for i in range(len(self.column_names)):
+                column_types += f"{self.column_types[i].center(COLUMN_SIZE, ' ')}"
+                if i < (len(self.column_names) - 1):
+                    column_types += "│"
+            column_types += "│"
         
-        return text
+            fancy_table_name = f"Table {self.table_name}"
+            table_name = ("│" + fancy_table_name.center(TABLE_SIZE, " ") + "│") + "\n"
+
+            text = "┌" + ("─" * TABLE_SIZE) + "┐" + "\n"
+            text += table_name
+            text += "├" + ((("─" * COLUMN_SIZE) + "┬") * (len(self.column_names) - 1)) + ("─" * COLUMN_SIZE) + "┤" + "\n"
+            text += column_names + "\n"
+            text += column_types + "\n"
+        else:
+            fancy_table_name = f"Table {self.table_name}"
+            table_name = ("│" + fancy_table_name.center(15, " ") + "│") + "\n"
+
+            text = "┌" + ("─" * 15) + "┐" + "\n"
+            text += table_name
+            text += "└" + ("─" * 15) + "┘" + "\n"
+        
+        return text, len(self.column_names)

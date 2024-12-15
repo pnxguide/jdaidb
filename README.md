@@ -6,9 +6,6 @@
 
 This system is based on the great Codd's Relational data model. It is enhanced with the fake LRU-based buffer pool for OLTP-based workloads. This system also supports a subset of SQL-92 with decent implementations of relational operators. This system does not support multiple users at the same time (i.e., concurrent access).
 
-## Integration Dependency
-This system must be used with `sunbears`'s DataFrame.
-
 ## Setting Up
 TBA
 

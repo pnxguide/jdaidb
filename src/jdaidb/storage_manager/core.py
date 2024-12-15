@@ -16,7 +16,10 @@ class StorageManager:
         self.__restore()
 
         # TODO(A1): Buffer pool initialization
-        self.buffer_pool = BufferPool(16)
+        self.buffer_pool = BufferPool(16, self)
+
+    def teardown(self):
+        self.__flush()
 
     """
     Public Functions
@@ -25,10 +28,15 @@ class StorageManager:
     # C
     def create_page(self, types) -> int:
         self.current_page_id += 1
-        new_page = Page(page_size=self.page_size, types=types)
-        write_file(f"{self.disk_path}/{self.current_page_id}.page", str(new_page))
+        new_page = Page(page_size=self.page_size, types=types, tuples=[])
+
+        # TODO(A1): Put the new page into the buffer pool first
+        self.buffer_pool.put(self.current_page_id, new_page)
+
+        # write_file(f"{self.disk_path}/{self.current_page_id}.page", str(new_page))
         self.page_directory[self.current_page_id] = f"{self.disk_path}/{self.current_page_id}.page"
-        self.__flush()
+        # self.__flush()
+        
         return self.current_page_id
     
     # R
@@ -38,10 +46,12 @@ class StorageManager:
             raise ValueError(f"Page {id} does not exist")
 
         # TODO(A1): Check whether the page is in buffer pool or not
-
+        page = self.buffer_pool.get(id)
+        if page == None:
+            page_content = read_file(path)
+            page = Page(page_str=page_content)
+            self.buffer_pool.put(id, page)
         
-        page_content = read_file(path)
-        page = Page(page_str=page_content)
         return page
     
     def is_page_full(self, id: int) -> bool:
@@ -52,8 +62,17 @@ class StorageManager:
         path = self.__find_page(id)
         if path == None:
             raise ValueError(f"Page {id} does not exist")
+
+        # TODO(A1): Check whether the page is in buffer pool or not
+        self.buffer_pool.put(id, updated_page)
+
+    # U (used by buffer pool)
+    def flush_page(self, id: int, updated_page: Page):
+        path = self.__find_page(id)
+        if path == None:
+            raise ValueError(f"Page {id} does not exist")
+
         write_file(path, str(updated_page))
-        self.__flush()
 
     def add_tuple_to_page(self, id: int, row: tuple) -> bool:
         page = self.read_page(id)
@@ -63,6 +82,9 @@ class StorageManager:
     # D
     def delete_page(self, id: int):
         if self.__page_exist(id):
+            # TODO(A1): Forcely evict the page
+            self.buffer_pool.evict(id)
+
             os.remove(self.page_directory[id])
             self.page_directory.pop(id)
         else:
@@ -80,6 +102,9 @@ class StorageManager:
         return self.page_directory[id]
 
     def __flush(self):
+        # flush all in buffer pool
+        self.buffer_pool.flush_all()
+
         page_directory_str = f"{self.current_page_id}|{len(self.page_directory.keys())}"
         for page_id in self.page_directory.keys():
             page_directory_str += f"|{page_id}|{self.page_directory[page_id]}"

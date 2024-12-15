@@ -1,7 +1,5 @@
-from sunbears.dataframe import DataFrame
-
 class Page:
-    def __init__(self, page_size=512, types=[], tuples=[], page_str=None):
+    def __init__(self, page_size=1024, types=[], tuples=[], page_str=None):
         if not page_str is None:
             lines = page_str.strip().splitlines()
             self.page_size = int(lines[0])

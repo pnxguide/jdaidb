@@ -11,8 +11,8 @@ class Catalog:
 
         self.__table_directory = {}
         self.__restore()
-    
-    def __del__(self):
+
+    def teardown(self):
         self.__flush()
     
     """

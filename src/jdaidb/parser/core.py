@@ -3,6 +3,9 @@ from jdaidb.query_engine.core import QueryEngine
 class Parser:
     def __init__(self, engine: QueryEngine):
         self.engine = engine
+
+    def teardown(self):
+        self.engine.teardown()
     
     """
     Public Functions
