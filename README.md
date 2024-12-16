@@ -6,21 +6,7 @@
 
 This system is based on the great Codd's Relational data model. It is enhanced with the fake LRU-based buffer pool for OLTP-based workloads. This system also supports a subset of SQL-92 with decent implementations of relational operators. This system does not support multiple users at the same time (i.e., concurrent access).
 
-## Setting Up
-There are multiple components in `jdaidb` as described below:
-- `catalog`: The collection of code maintaining the system catalog for `jdaidb`
-- `common`: The collection of utility code (e.g., files)
-- `interface`: The collection of code making an interface (e.g., command-line interface)
-- `parser`: The collection of code for parsing the SQL statement and executing it
-- `query_engine`: The collection of code for executing the parsed SQL statement
-- `storage_manager`: The collection of code for managing database storage and buffer pool
-
-## Assignment #1 - Database Storage (Due: January 13th, 2025 11:59 PM)
-The first assignment will be on the `storage_manager` component. In short, you will need to implement the `buffer_pool` code and make the `core` code utilizes it.
-
-In order to do so, you will need to understand the code in the `storage_manager` component and other relevant components.
-
-### Part Zero - Trying `jdaidb`
+## Trying `jdaidb`
 Before we begin, I would suggest you try using `jdaidb` first. To run it, you should go to the driver file (`src/run.py`) or simply type the following command in your terminal.
 
 ```
@@ -33,6 +19,20 @@ The first version of `jdaidb` allows you to do three main things:
 - Create a table using a `CREATE TABLE` statement. However, it is not based on the SQL-92 standard. Please check out the `src/test_jdaidb.py` for the precise syntax.
 - Insert a row into a table using a `INSERT INTO` statement
 - Drop a table using a `DROP TABLE` statement.
+
+## Overview
+There are multiple components in `jdaidb` as described below:
+- `catalog`: The collection of code maintaining the system catalog for `jdaidb`
+- `common`: The collection of utility code (e.g., files)
+- `interface`: The collection of code making an interface (e.g., command-line interface)
+- `parser`: The collection of code for parsing the SQL statement and executing it
+- `query_engine`: The collection of code for executing the parsed SQL statement
+- `storage_manager`: The collection of code for managing database storage and buffer pool
+
+## Assignment #1 - Database Storage (Due: January 13th, 2025 11:59 PM)
+The first assignment will be on the `storage_manager` component. In short, you will need to implement the `buffer_pool` code and make the `core` code utilizes it.
+
+In order to do so, you will need to understand the code in the `storage_manager` component and other relevant components.
 
 ### Part A - Understanding Storage Manager
 Firstly, to understand the storage manager, you will need to understand the role of typical storage managers first. We did it in the class, by the way.
