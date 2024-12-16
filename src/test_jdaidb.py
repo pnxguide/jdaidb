@@ -18,8 +18,8 @@ if os.path.exists(DISK_PATH) and os.path.isdir(DISK_PATH):
     shutil.rmtree(DISK_PATH)
 os.makedirs(DISK_PATH)
 
-catalog = Catalog(disk_path=DISK_PATH, page_size=1024, buffer_size=1048576)
-sm = StorageManager(catalog=catalog)
+catalog = Catalog(disk_path=DISK_PATH)
+sm = StorageManager(disk_path=DISK_PATH, page_size=1024, buffer_size=16384)
 qe = QueryEngine(catalog=catalog, storage_manager=sm)
 parser = Parser(qe)
 

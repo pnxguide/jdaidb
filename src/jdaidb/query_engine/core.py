@@ -2,12 +2,11 @@ from jdaidb.catalog.core import Catalog
 from jdaidb.storage_manager.core import StorageManager
 
 class QueryEngine():
-    def __init__(self, catalog: Catalog, storage_manager: StorageManager):
-        self.catalog = catalog
+    def __init__(self, storage_manager: StorageManager):
         self.storage_manager = storage_manager
+        self.catalog = self.storage_manager.catalog
 
     def teardown(self):
-        self.catalog.teardown()
         self.storage_manager.teardown()
 
     """
@@ -18,14 +17,14 @@ class QueryEngine():
     def create_table(self, table_name: str, column_names: list[str], column_types: list[str]):
         self.catalog.add_table_entry(table_name, column_names, column_types)
         page_id = self.storage_manager.create_page(column_types)
-        self.catalog.add_page_to_table(table_name, page_id)
+        self.storage_manager.add_page_to_table(table_name, page_id)
     
     # DROP TABLE
     def drop_table(self, table_name: str):
         page_ids = self.catalog.get_pages_from_table(table_name)
         for page_id in page_ids:
+            self.storage_manager.remove_page_from_table(table_name, page_id)
             self.storage_manager.delete_page(page_id)
-            self.catalog.remove_page_from_table(table_name, page_id)
         self.catalog.remove_table_entry(table_name)
 
     # INSERT
@@ -42,7 +41,7 @@ class QueryEngine():
             else:
                 raise ValueError(f"type {types[i]} does not exist")
 
-        page_ids = self.catalog.get_pages_from_table(table_name)
+        page_ids = self.storage_manager.get_pages_from_table(table_name)
 
         is_inserted = False
         for page_id in page_ids:
@@ -55,7 +54,7 @@ class QueryEngine():
         if not is_inserted:
             types = self.catalog.get_types_from_table(table_name)
             page_id = self.storage_manager.create_page(types)
-            self.catalog.add_page_to_table(table_name, page_id)
+            self.storage_manager.add_page_to_table(table_name, page_id)
             self.storage_manager.add_tuple_to_page(page_id, row)
         
     # SELECT *
@@ -66,7 +65,7 @@ class QueryEngine():
         header, num_col = self.catalog.get_table_header(table_name)
         text += header
         row_count = 0
-        page_ids = self.catalog.get_pages_from_table(table_name)
+        page_ids = self.storage_manager.get_pages_from_table(table_name)
         for page_id in page_ids:
             page = self.storage_manager.read_page(page_id)
             for row in page.get_all_tuples():
