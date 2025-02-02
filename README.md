@@ -33,6 +33,7 @@ There are multiple components in `jdaidb` as described below:
 
 ## Assignment #1 - Database Storage (Due: January 13th, 2025 11:59 PM)
 <details>
+
 The first assignment will be on the `storage_manager` component. In short, you will need to implement the `buffer_pool` code and make the `core` code utilizes it.
 
 In order to do so, you will need to understand the code in the `storage_manager` component and other relevant components.
@@ -68,6 +69,7 @@ The buffer pool in `jdaidb` required in this assignment is the buffer pool that 
 
 ### Part C - Linking Storage Manager with Buffer Pool
 If you look at the `src/jdaidb/storage_manager/core.py` carefully, you will see that there are many `TODO(A1):`. Those positions are where you need to link the original storage manager with the buffer pool. Unless you understand the storage manager and buffer pool code, you will not be able to complete this. To help you, several hints are provided pretty straightforwardly. You can consult with those in order to get this part done.
+
 </details>
 
 ## Assignment #2 - Database Tree and Hash Table (Due: February 10th, 2025 11:59 PM)
