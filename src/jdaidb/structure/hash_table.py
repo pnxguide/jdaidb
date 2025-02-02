@@ -1,9 +1,5 @@
 class HashTableEntry:
     def __init__(self):
-        self.left = None
-        self.right = None
-        self.key = None
-        
         # Doing "separate chaining" using list
         self.value = []
 

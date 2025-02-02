@@ -71,6 +71,8 @@ If you look at the `src/jdaidb/storage_manager/core.py` carefully, you will see 
 </details>
 
 ## Assignment #2 - Database Tree and Hash Table (Due: February 10th, 2025 11:59 PM)
+<details>
+
 You will be implementing two database data structures, Binary Search Tree (BST), and Hash Table. Even though BST is uncommon in typical database management systems, it is better to start from BST rather than implementing the popular B+Tree.
 
 ### Part A - Binary Search Tree
@@ -189,36 +191,161 @@ We will not give you a specification of how the testing code should look like. Y
 ### Check-Out
 The regular schedule for the check-out should be released 1 week before the due date. However, if you want an early check-out, please feel free to contact me via Discord.
 
-## Assignment #3 - Query Engine
-<details>
-TBA
-
-### Part A - SQL Parser
-TBA
-
-### Part B - Sequential Scan
-TBA
-
-### Part C - Index Scan
-TBA
-
-### Part D - Filter
-TBA
-<!-- Luckily, Filter will be pretty much the same as in Assignment #0. However, you need to deal with a string pattern matching operator (e.g., LIKE). -->
-
-### Part E - Project
-TBA
-<!-- Similar to Filter, Project will be pretty much the same as in Assignment #0. Except, you need to support literals, expressions with a limited set of arithmetic operators (which are `+`, `-`, `*`, `/`). -->
-
-### Part F - Result
-TBA
-
-### Part G - Nested Loop Join
-TBA
-
-### Part H - Sort-Merge Join
-TBA
-
-### Part I - Hash Join
-TBA
 </details>
+
+## Assignment #3 - Query Operator Implementation (Due: March 2nd, 2025 11:59 PM)
+In the last assignment, you will implement key query operators, including, `DISTINCT`, `GROUP BY` along with `COUNT(*)`, and `INNER JOIN`. Since you have done an implementation of in-memory tables (e.g., `sunbears`) in Assignment 0, we will leverage that implementation so that you do not need to deal with the table again.
+
+In case that you do not have a proper implementation of `sunbears`, you do not need to use `project`, `filter`, `count`, and methods you implemented in Assignment 0. Actually, you can use `src/jdaidb/sunbears/dataframe.py` we give you in this repository.
+
+Also, as you have learned from the lectures, all of those query operators can utilize hash tables to implement them. Luckily, you have an implementation of an integer-based `HashTable` from Assignment 2, you will have a chance to use it. However, you need to make sure that your implementation is valid.
+
+There will be 5 parts. We try to arrange it from easy to hard. Please see them for yourself.
+
+### Part A - Distinct
+**Target File: `src/jdaidb/query_engine/op/op_distinct.py`**
+
+`DISTINCT` in this assignment is close to the following SQL statement:
+
+```sql
+SELECT DISTINCT integer_column
+FROM dataframe;
+```
+
+For `DISTINCT`, we will simplify it that you only need to deal with a single-column integer dataframe. Thus, you need to do `if` check to see whether the input dataframe has only a single column and it is integer or not.
+
+To implement `DISTINCT`, you should be able to do it by iterating through all the rows (i.e., integers). For each row, you will read whether the integer is already an existing key in the hash table or not (Hint: Use `read`). If it is, you do not need to do anything. Otherwise, you `write` the integer into the hash table as a key (for the value, it can be anything (e.g., `1`); we do not use it anyway).
+
+Note that you may want to modify the `read` method of the `HashTable` so that it throws an error when the key does not exist.
+
+```py3
+def read(self, key):
+  # Code for doing read
+
+  if not_found:
+    raise Exception("key does not exist")
+```
+
+The code inside of the loop should be similar to this:
+
+```py3
+try:
+  value = hash_table.read(key)
+  # TODO: Push the value into the new dataframe
+  #       ...
+except:
+  pass
+```
+
+Finally, you can read through the hash table to extract all the existing keys and create a new dataframe based on them.
+
+### Part B - Group Count Star
+**Target File: `src/jdaidb/query_engine/op/op_aggregate_count.py`**
+
+As a reference, this part is close to the following SQL statement:
+
+```sql
+SELECT COUNT(*)
+FROM dataframe
+GROUP BY group_column;
+```
+
+Again, we will simplify that you only need to support a single `group_column` whose type must be integer. Be sure to verify this through `if` before going further.
+
+To implement this, it is similar to `DISTINCT`. However, if the key does not exist, you then now need to `write` the key with the value `1`. If the key does exist, you need to increment the value of the key by `1`. You may want to use the following code to increment:
+
+```py3
+old_value = hash_table.read(key)
+new_value = old_value + 1
+hash_table.write(key, new_value)
+```
+
+### Part C - Nested Loop Join
+**Target File: `src/jdaidb/query_engine/op/op_nested_loop_join.py`**
+
+Now, we are working on joining two dataframes, which should be similar to the following SQL statement:
+
+```sql
+SELECT *
+FROM outer, inner
+WHERE outer.outer_join_column = inner.inner_join_column;
+```
+
+Again, to simplify, the join columns need to be integers (i.e., this is for Part E, which is Hash Join).
+
+Firstly, you should check whether the join columns exist in the dataframes or not. Also, do not forget to check whether they are integers. Then, you need to find the indexes of the join columns. This should be similar to when you did `project` in Assignment 0.
+
+```py3
+outer_join_column_index = -1
+for i in range(0, len(column_names), 1):
+  if column_names[i] == outer_join_column:
+    outer_join_column_index = i
+    break
+
+if outer_join_column_index == -1:
+  raise Exception("no join column in outer")
+```
+
+After that, you need to do the join. In this part, you will be doing [Nested-Loop Join](https://en.wikipedia.org/wiki/Nested_loop_join). While doing the join, you should create the new dataframe along the way.
+
+### Part D - Sort-Merge Join
+**Target File: `src/jdaidb/query_engine/op/op_sort_merge_join.py`**
+
+Similar to Part C, instead, you need to do [Sort-Merge Join](https://en.wikipedia.org/wiki/Sort-merge_join).
+
+The algorithm in the link is quite complicated. You may want to go through the following guideline:
+1. Sort both dataframes based on the join keys. You may want to use [`sorted()`](https://learnpython.com/blog/sort-tuples-in-python/).
+2. Do the merge scan. The merge scan should be similar to the followign code:
+
+```py3
+outer_index = 0
+inner_index = 0
+
+while outer_index < len(outer) and inner_index < len(inner):
+  outer_tuple = outer[outer_index]
+  inner_tuple = inner[inner_index]
+  if outer_tuple == inner_tuple:
+    # TODO: Combine outer_tuple and inner_tuple into one and append it into the new dataframe
+
+    outer_index += 1
+    inner_index += 1
+  elif outer_tuple < inner_tuple:
+    outer_index += 1
+  else:
+    inner_index += 1
+```
+
+Even though we give you the code for merge scan, you will still need to understand it in order to pass the check-out.
+
+### Part E - Hash Join
+**Target File: `src/jdaidb/query_engine/op/op_hash_join.py`**
+
+Similar to Part C, instead, you need to do [Hash Join](https://en.wikipedia.org/wiki/Hash_join).
+
+The hash join consists of two main phases:
+1. **Hash Table Creation**: You need to create a hash table based on the join column of the outer table. The value must be a list of tuples. When the key collides, you need to append the tuple to the list of that key.
+2. **Hash Table Probing**: You need to loop through each tuple in the inner table and check whether the value of the join column exists in the hash table or not. If it is, then this tuple and the tuple(s) in the hash table whose key matches must be combined and appended to the result.
+
+The idea should be pretty similar to the following code:
+
+```py3
+hash_table = create_hash_table(outer)
+
+for inner_tuple in inner:
+  try:
+    outer_tuples = hash_table.read(inner_tuple[inner_join_index])
+    for outer_tuple in outer_tuples:
+      # TODO: Combine outer_tuple and inner_tuple into one and append it into the new dataframe
+
+  except:
+    pass
+```
+
+### Check-Out
+You should check-out during March 8th to March 9th. If you want an early check-out, please contact me in advance. In order to pass the check-out, you will encounter the questions in the following topics:
+
+- Distinct or Group Count Star
+- Sort-Merge Join (especially, the **merge scan** part)
+- Hash Join
+
+For this check-out, you only have one attempt. However, you can get consulted with TAs before the time. Please be well-prepared.
