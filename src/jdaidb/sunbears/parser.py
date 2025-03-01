@@ -1,4 +1,4 @@
-from sunbears.dataframe import DataFrame
+from jdaidb.sunbears.dataframe import DataFrame
 
 def infer_type(val):
     try:
